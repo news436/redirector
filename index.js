@@ -233,7 +233,7 @@ app.get("/api/videos/p/:shortId", async (req, res) => {
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/video/${video.id}\" />
-        <meta property=\"og:type\" content=\"video.other\" />
+        <meta property=\"og:type\" content=\"article\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
         <meta name=\"twitter:description\" content=\"${fullDescription}\" />
@@ -286,7 +286,7 @@ app.get("/api/videos/preview/:id", async (req, res) => {
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/video/${video.id}\" />
-        <meta property=\"og:type\" content=\"video.other\" />
+        <meta property=\"og:type\" content=\"article\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
         <meta name=\"twitter:description\" content=\"${fullDescription}\" />
