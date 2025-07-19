@@ -281,21 +281,23 @@ app.get("/api/videos/preview/:id", async (req, res) => {
       <html lang=\"hi\">
       <head>
         <meta charset=\"UTF-8\" />
-        <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:title\" content=\"${video.title_hi || video.title}\" />
+        <meta property=\"og:description\" content=\"${video.description_hi || video.description || ''}\" />
         <meta property=\"og:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/video/${video.id}\" />
         <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
-        <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:title\" content=\"${video.title_hi || video.title}\" />
+        <meta name=\"twitter:description\" content=\"${video.description_hi || video.description || ''}\" />
         <meta name=\"twitter:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
       </head>
       <body>
         <script>
-          window.location.href = \"https://voiceofbharat.live/video/${video.id}\";
+          setTimeout(function() {
+            window.location.href = \"https://voiceofbharat.live/video/${video.id}\";
+          }, 2500);
         </script>
       </body>
       </html>
@@ -422,21 +424,23 @@ app.get("/api/live/preview/:id", async (req, res) => {
       <html lang=\"hi\">
       <head>
         <meta charset=\"UTF-8\" />
-        <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:title\" content=\"${live.title_hi || live.title}\" />
+        <meta property=\"og:description\" content=\"${live.description_hi || live.description || ''}\" />
         <meta property=\"og:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/live/${live.id}\" />
         <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
-        <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:title\" content=\"${live.title_hi || live.title}\" />
+        <meta name=\"twitter:description\" content=\"${live.description_hi || live.description || ''}\" />
         <meta name=\"twitter:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
       </head>
       <body>
         <script>
-          window.location.href = \"https://voiceofbharat.live/live/${live.id}\";
+          setTimeout(function() {
+            window.location.href = \"https://voiceofbharat.live/live/${live.id}\";
+          }, 2500);
         </script>
       </body>
       </html>
