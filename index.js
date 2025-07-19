@@ -8,6 +8,7 @@ const SUPABASE_ENDPOINT = "https://glskqjpmcolfxteyqhzm.supabase.co/rest/v1/arti
 const VIDEOS_ENDPOINT = "https://glskqjpmcolfxteyqhzm.supabase.co/rest/v1/videos";
 const SHORTENER_ENDPOINT = "https://glskqjpmcolfxteyqhzm.supabase.co/rest/v1/url_shortener";
 const SOCIALS_ENDPOINT = "https://glskqjpmcolfxteyqhzm.supabase.co/rest/v1/socials";
+const LIVE_ENDPOINT = "https://glskqjpmcolfxteyqhzm.supabase.co/rest/v1/live_streams";
 
 // Helper to fetch Facebook page link
 async function getFacebookUrl() {
@@ -229,15 +230,15 @@ app.get("/api/videos/p/:shortId", async (req, res) => {
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
         <meta property=\"og:description\" content=\"${fullDescription}\" />
-        <meta property=\"og:image\" content=\"${video.thumbnail_url || ''}\" />
+        <meta property=\"og:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/video/${video.id}\" />
-        <meta property=\"og:type\" content=\"article\" />
+        <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
         <meta name=\"twitter:description\" content=\"${fullDescription}\" />
-        <meta name=\"twitter:image\" content=\"${video.thumbnail_url || ''}\" />
+        <meta name=\"twitter:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
       </head>
       <body>
         <script>
@@ -282,15 +283,15 @@ app.get("/api/videos/preview/:id", async (req, res) => {
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
         <meta property=\"og:description\" content=\"${fullDescription}\" />
-        <meta property=\"og:image\" content=\"${video.thumbnail_url || ''}\" />
+        <meta property=\"og:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
         <meta property=\"og:url\" content=\"https://voiceofbharat.live/video/${video.id}\" />
-        <meta property=\"og:type\" content=\"article\" />
+        <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
         <meta name=\"twitter:description\" content=\"${fullDescription}\" />
-        <meta name=\"twitter:image\" content=\"${video.thumbnail_url || ''}\" />
+        <meta name=\"twitter:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
       </head>
       <body>
         <script>
@@ -301,6 +302,147 @@ app.get("/api/videos/preview/:id", async (req, res) => {
     `);
   } catch (error) {
     console.error("Error fetching video:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+// --- LIVE STREAM ENDPOINTS ---
+
+app.get("/api/live/p/:shortId", async (req, res) => {
+  const { shortId } = req.params;
+  try {
+    let liveId = null;
+    let lookupByShortId = false;
+    if (/^[a-zA-Z0-9]{6}$/.test(shortId)) {
+      lookupByShortId = true;
+    } else {
+      let base64 = shortId.replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) base64 += '=';
+      try {
+        liveId = Buffer.from(base64, 'base64').toString('utf-8');
+      } catch (e) {
+        liveId = null;
+      }
+    }
+    let liveIdToFetch = null;
+    if (lookupByShortId) {
+      const urlShortenerResponse = await fetch(
+        `${SHORTENER_ENDPOINT}?live_id=not.is.null&short_id=eq.${shortId}`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+      const urlShortenerData = await urlShortenerResponse.json();
+      liveIdToFetch = urlShortenerData[0]?.live_id;
+    } else if (liveId) {
+      liveIdToFetch = liveId;
+    }
+    if (!liveIdToFetch) {
+      return res.status(404).send("Short URL not found");
+    }
+    const response = await fetch(
+      `${LIVE_ENDPOINT}?id=eq.${liveIdToFetch}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+    const data = await response.json();
+    const live = data[0];
+    if (!live) {
+      return res.status(404).send("Live stream not found");
+    }
+    const facebookUrl = await getFacebookUrl();
+    const title = live.title_hi || live.title;
+    const description = live.description_hi || live.description || '';
+    const shortDescription = description.split(/[.!?\n]/)[0];
+    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
+    const fullDescription = `${shortDescription}${facebookCta}`;
+    res.setHeader("Content-Type", "text/html");
+    res.send(`
+      <!DOCTYPE html>
+      <html lang=\"hi\">
+      <head>
+        <meta charset=\"UTF-8\" />
+        <meta property=\"og:title\" content=\"${title}\" />
+        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
+        <meta property=\"og:image:width\" content=\"1200\" />
+        <meta property=\"og:image:height\" content=\"630\" />
+        <meta property=\"og:url\" content=\"https://voiceofbharat.live/live/${live.id}\" />
+        <meta property=\"og:type\" content=\"video.other\" />
+        <meta name=\"twitter:card\" content=\"summary_large_image\" />
+        <meta name=\"twitter:title\" content=\"${title}\" />
+        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
+      </head>
+      <body>
+        <script>
+          window.location.href = \"https://voiceofbharat.live/live/${live.id}\";
+        </script>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error("Error fetching live by shortId:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/api/live/preview/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const response = await fetch(`${LIVE_ENDPOINT}?id=eq.${id}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+    const data = await response.json();
+    const live = data[0];
+    if (!live) {
+      return res.status(404).send("Live stream not found");
+    }
+    const facebookUrl = await getFacebookUrl();
+    const title = live.title_hi || live.title;
+    const description = live.description_hi || live.description || '';
+    const shortDescription = description.split(/[.!?\n]/)[0];
+    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
+    const fullDescription = `${shortDescription}${facebookCta}`;
+    res.setHeader("Content-Type", "text/html");
+    res.send(`
+      <!DOCTYPE html>
+      <html lang=\"hi\">
+      <head>
+        <meta charset=\"UTF-8\" />
+        <meta property=\"og:title\" content=\"${title}\" />
+        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
+        <meta property=\"og:image:width\" content=\"1200\" />
+        <meta property=\"og:image:height\" content=\"630\" />
+        <meta property=\"og:url\" content=\"https://voiceofbharat.live/live/${live.id}\" />
+        <meta property=\"og:type\" content=\"video.other\" />
+        <meta name=\"twitter:card\" content=\"summary_large_image\" />
+        <meta name=\"twitter:title\" content=\"${title}\" />
+        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
+      </head>
+      <body>
+        <script>
+          window.location.href = \"https://voiceofbharat.live/live/${live.id}\";
+        </script>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error("Error fetching live:", error);
     res.status(500).send("Server error");
   }
 });
