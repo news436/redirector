@@ -297,7 +297,7 @@ app.get("/api/videos/preview/:id", async (req, res) => {
         <script>
           setTimeout(function() {
             window.location.href = \"https://voiceofbharat.live/video/${video.id}\";
-          }, 2500);
+          }, 5000);
         </script>
       </body>
       </html>
