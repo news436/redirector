@@ -26,6 +26,9 @@ async function getFacebookUrl() {
   }
 }
 
+// Use the same WhatsApp share message format for og:description and twitter:description in all preview endpoints
+const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/G07QUAWvRkKEGUvk2KBmFu?mode=ac_c';
+
 // --- ARTICLE ENDPOINTS ---
 
 app.get("/api/articles/p/:shortId", async (req, res) => {
@@ -81,8 +84,7 @@ app.get("/api/articles/p/:shortId", async (req, res) => {
     const title = article.title_hi || article.title;
     const description = article.summary_hi || article.summary || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/article/${article.slug}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
@@ -90,7 +92,7 @@ app.get("/api/articles/p/:shortId", async (req, res) => {
       <head>
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:description\" content=\"${fullMessage}\" />
         <meta property=\"og:image\" content=\"${article.featured_image_url}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
@@ -98,12 +100,14 @@ app.get("/api/articles/p/:shortId", async (req, res) => {
         <meta property=\"og:type\" content=\"article\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:description\" content=\"${fullMessage}\" />
         <meta name=\"twitter:image\" content=\"${article.featured_image_url}\" />
       </head>
       <body>
         <script>
-          window.location.href = \"https://voiceofbharat.live/article/${article.slug}\";
+          setTimeout(function() {
+            window.location.href = \"https://voiceofbharat.live/article/${article.slug}\";
+          }, 2500);
         </script>
       </body>
       </html>
@@ -132,8 +136,7 @@ app.get("/api/articles/preview/:id", async (req, res) => {
     const title = article.title_hi || article.title;
     const description = article.summary_hi || article.summary || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/article/${article.slug}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
@@ -141,7 +144,7 @@ app.get("/api/articles/preview/:id", async (req, res) => {
       <head>
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:description\" content=\"${fullMessage}\" />
         <meta property=\"og:image\" content=\"${article.featured_image_url}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
@@ -149,12 +152,14 @@ app.get("/api/articles/preview/:id", async (req, res) => {
         <meta property=\"og:type\" content=\"article\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:description\" content=\"${fullMessage}\" />
         <meta name=\"twitter:image\" content=\"${article.featured_image_url}\" />
       </head>
       <body>
         <script>
-          window.location.href = \"https://voiceofbharat.live/article/${article.slug}\";
+          setTimeout(function() {
+            window.location.href = \"https://voiceofbharat.live/article/${article.slug}\";
+          }, 2500);
         </script>
       </body>
       </html>
@@ -220,8 +225,7 @@ app.get("/api/videos/p/:shortId", async (req, res) => {
     const title = video.title_hi || video.title;
     const description = video.description_hi || video.description || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/video/${video.id}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
@@ -229,7 +233,7 @@ app.get("/api/videos/p/:shortId", async (req, res) => {
       <head>
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:description\" content=\"${fullMessage}\" />
         <meta property=\"og:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
@@ -237,7 +241,7 @@ app.get("/api/videos/p/:shortId", async (req, res) => {
         <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:description\" content=\"${fullMessage}\" />
         <meta name=\"twitter:image\" content=\"${video.thumbnail_url || video.featured_image_url || ''}\" />
       </head>
       <body>
@@ -273,8 +277,7 @@ app.get("/api/videos/preview/:id", async (req, res) => {
     const title = video.title_hi || video.title;
     const description = video.description_hi || video.description || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/video/${video.id}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
@@ -297,7 +300,7 @@ app.get("/api/videos/preview/:id", async (req, res) => {
         <script>
           setTimeout(function() {
             window.location.href = \"https://voiceofbharat.live/video/${video.id}\";
-          }, 2000);
+          }, 2500);
         </script>
       </body>
       </html>
@@ -363,8 +366,7 @@ app.get("/api/live/p/:shortId", async (req, res) => {
     const title = live.title_hi || live.title;
     const description = live.description_hi || live.description || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/live/${live.id}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
@@ -372,7 +374,7 @@ app.get("/api/live/p/:shortId", async (req, res) => {
       <head>
         <meta charset=\"UTF-8\" />
         <meta property=\"og:title\" content=\"${title}\" />
-        <meta property=\"og:description\" content=\"${fullDescription}\" />
+        <meta property=\"og:description\" content=\"${fullMessage}\" />
         <meta property=\"og:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
         <meta property=\"og:image:width\" content=\"1200\" />
         <meta property=\"og:image:height\" content=\"630\" />
@@ -380,7 +382,7 @@ app.get("/api/live/p/:shortId", async (req, res) => {
         <meta property=\"og:type\" content=\"video.other\" />
         <meta name=\"twitter:card\" content=\"summary_large_image\" />
         <meta name=\"twitter:title\" content=\"${title}\" />
-        <meta name=\"twitter:description\" content=\"${fullDescription}\" />
+        <meta name=\"twitter:description\" content=\"${fullMessage}\" />
         <meta name=\"twitter:image\" content=\"${live.thumbnail_url || live.featured_image_url || ''}\" />
       </head>
       <body>
@@ -416,8 +418,7 @@ app.get("/api/live/preview/:id", async (req, res) => {
     const title = live.title_hi || live.title;
     const description = live.description_hi || live.description || '';
     const shortDescription = description.split(/[.!?\n]/)[0];
-    const facebookCta = facebookUrl ? `\n\nऔर खबरों के लिए हमें फेसबुक पर फॉलो करें: ${facebookUrl}` : '';
-    const fullDescription = `${shortDescription}${facebookCta}`;
+    const fullMessage = `${shortDescription}\nhttps://voiceofbharat.live/live/${live.id}\nहमें फेसबुक पर फॉलो करें: ${facebookUrl}\n----------------------\nहमारे व्हाट्सएप ग्रुप से जुड़ें: ${WHATSAPP_GROUP_LINK}`;
     res.setHeader("Content-Type", "text/html");
     res.send(`
       <!DOCTYPE html>
